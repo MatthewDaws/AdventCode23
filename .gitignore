@@ -1,3 +1,13 @@
+# Puzzle input files
+input*.txt
+
+
+
+
+
+#### GITHUB auto generated below
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
