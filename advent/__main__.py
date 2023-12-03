@@ -22,3 +22,7 @@ if puzzle==1:
 if puzzle==2:
     import two
     print(two.main(second_flag))
+
+if puzzle==3:
+    import three
+    print(three.main(second_flag))
