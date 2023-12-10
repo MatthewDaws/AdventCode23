@@ -26,3 +26,8 @@ if puzzle==2:
 if puzzle==3:
     import three
     print(three.main(second_flag))
+
+if puzzle==4:
+    import four
+    print(four.main(second_flag))
+
