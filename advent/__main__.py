@@ -31,3 +31,10 @@ if puzzle==4:
     import four
     print(four.main(second_flag))
 
+if puzzle==5:
+    import five
+    print(five.main(second_flag))
+
+if puzzle==6:
+    import six
+    print(six.main(second_flag))
