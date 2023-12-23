@@ -16,33 +16,37 @@ except:
     exit(-1)
 
 if puzzle==1:
-    import one
+    from . import one
     print(one.main(second_flag))
 
 if puzzle==2:
-    import two
+    from . import two
     print(two.main(second_flag))
 
 if puzzle==3:
-    import three
+    from . import three
     print(three.main(second_flag))
 
 if puzzle==4:
-    import four
+    from . import four
     print(four.main(second_flag))
 
 if puzzle==5:
-    import five
+    from . import five
     print(five.main(second_flag))
 
 if puzzle==6:
-    import six
+    from . import six
     print(six.main(second_flag))
 
 if puzzle==7:
-    import seven
+    from . import seven
     print(seven.main(second_flag))
 
 if puzzle==8:
-    import eight
+    from . import eight
     print(eight.main(second_flag))
+
+if puzzle==9:
+    from . import nine
+    print(nine.main(second_flag))

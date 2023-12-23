@@ -1,5 +1,5 @@
 import re, math, itertools
-import util
+from . import util
 
 class LeftRight():
     def __init__(self, string):
