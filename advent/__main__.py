@@ -42,3 +42,7 @@ if puzzle==6:
 if puzzle==7:
     import seven
     print(seven.main(second_flag))
+
+if puzzle==8:
+    import eight
+    print(eight.main(second_flag))
