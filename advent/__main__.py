@@ -50,3 +50,7 @@ if puzzle==8:
 if puzzle==9:
     from . import nine
     print(nine.main(second_flag))
+
+if puzzle==10:
+    from . import ten
+    print(ten.main(second_flag))
