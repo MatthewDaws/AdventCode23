@@ -58,3 +58,7 @@ if puzzle==10:
 if puzzle==11:
     from . import eleven
     print(eleven.main(second_flag))
+
+if puzzle==12:
+    from . import twelve
+    print(twelve.main(second_flag))
