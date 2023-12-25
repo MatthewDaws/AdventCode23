@@ -66,3 +66,7 @@ if puzzle==12:
 if puzzle==13:
     from . import thirteen
     print(thirteen.main(second_flag))
+
+if puzzle==14:
+    from . import fourteen
+    print(fourteen.main(second_flag))
