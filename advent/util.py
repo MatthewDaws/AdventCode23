@@ -62,3 +62,42 @@ def brute_force_chinese_remainder(anpairs):
         if all( (x-a)%n == 0 for (a,n) in anpairs ):
             return x
     raise ValueError()
+
+def winding_number(path, row, col):
+    """Computes the winding number of a path around the point (row,col).
+    `path` should be list of (row,col) coordinates."""
+    def quadrant(pos, path_pos):
+        deltarow, deltacol = path_pos[0] - pos[0], path_pos[1] - pos[1]
+        if deltacol > 0 and deltarow <=0:
+            return 0
+        if deltacol <= 0 and deltarow < 0:
+            return 1
+        if deltacol < 0 and deltarow >= 0:
+            return 2
+        if deltacol >=0 and deltarow > 0:
+            return 3
+        raise ValueError()
+    def update_crosses(last_quad, new_quad, crosses):
+        if last_quad == 0 and new_quad == 3:
+            return crosses + 1
+        if last_quad == 3 and new_quad == 0:
+            return crosses - 1
+        return crosses
+    # start_quad = quadrant((row,col), path[0])
+    # last_quad = start_quad
+    # crosses = 0
+    # for i in range(1, len(path)):
+    #     new_quad = quadrant((row,col), path[i])
+    #     crosses = update_crosses(last_quad, new_quad, crosses)
+    #     last_quad = new_quad
+    for i, pos in enumerate(path):
+        if i == 0:
+            start_quad = quadrant((row,col), pos)
+            last_quad = start_quad
+            crosses = 0
+        else:
+            new_quad = quadrant((row,col), pos)
+            crosses = update_crosses(last_quad, new_quad, crosses)
+            last_quad = new_quad
+    crosses = update_crosses(last_quad, start_quad, crosses)
+    return crosses

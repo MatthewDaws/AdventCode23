@@ -1,5 +1,7 @@
 import enum
 
+from .util import winding_number
+
 class Tile(enum.Enum):
     GROUND = "."
     LEFTRIGHT = "-"
@@ -134,34 +136,6 @@ class Ground():
             step, steps, path = self._try_closed_loop(tile)
             return path
 
-
-def winding_number(path, row, col):
-    def quadrant(pos, path_pos):
-        deltarow, deltacol = path_pos[0] - pos[0], path_pos[1] - pos[1]
-        if deltacol > 0 and deltarow <=0:
-            return 0
-        if deltacol <= 0 and deltarow < 0:
-            return 1
-        if deltacol < 0 and deltarow >= 0:
-            return 2
-        if deltacol >=0 and deltarow > 0:
-            return 3
-        raise ValueError()
-    def update_crosses(last_quad, new_quad, crosses):
-        if last_quad == 0 and new_quad == 3:
-            return crosses + 1
-        if last_quad == 3 and new_quad == 0:
-            return crosses - 1
-        return crosses
-    start_quad = quadrant((row,col), path[0])
-    last_quad = start_quad
-    crosses = 0
-    for i in range(1, len(path)):
-        new_quad = quadrant((row,col), path[i])
-        crosses = update_crosses(last_quad, new_quad, crosses)
-        last_quad = new_quad
-    crosses = update_crosses(last_quad, start_quad, crosses)
-    return crosses
 
 def count_containing_tiles(path):
     minrow = min(row for row,col in path)
