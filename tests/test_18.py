@@ -57,4 +57,43 @@ def test_right_angle_conjecture():
                 assert direction in ["U", "D"]
         current_dir = direction
 
-    
+def test_Construct():
+    with open(os.path.join("tests", "test_18.txt")) as f:
+        dp = eighteen.DigPlan(f)
+    rows, cols = eighteen.construct_row_plan(dp.instructions_without_colours())
+    assert rows[0] == [eighteen.Interval(0,6)]
+    assert rows[2] == [eighteen.Interval(0,2)]
+    assert rows[5] == [eighteen.Interval(0,2), eighteen.Interval(4,6)]
+    assert cols[0] == [(0,"D"), (6,"D")]
+    assert cols[5] == [(0,"D"), (2,"U"), (4,"D"), (6,"U")]
+
+def test_compute_all_up_downs():
+    with open(os.path.join("tests", "test_18.txt")) as f:
+        dp = eighteen.DigPlan(f)
+    _, cols = eighteen.construct_row_plan(dp.instructions_without_colours())
+    all_ud = eighteen.compute_all_up_downs(cols)
+    assert set(all_ud.keys()) == {0,2,5,7,9}
+    assert all_ud[0] == [0, 6]
+    assert all_ud[2] == [2, 6]
+    assert all_ud[5] == [0, 4]
+    assert all_ud[7] == [1, 6]
+    assert all_ud[9] == []
+
+def test_find_area():
+    with open(os.path.join("tests", "test_18.txt")) as f:
+        dp = eighteen.DigPlan(f)
+    _, cols = eighteen.construct_row_plan(dp.instructions_without_colours())
+    all_ud = eighteen.compute_all_up_downs(cols)
+    assert eighteen.compute_area(all_ud) == 62
+
+def test_problem1():
+    with open("input_18.txt") as f:
+        dp = eighteen.DigPlan(f)
+    _, cols = eighteen.construct_row_plan(dp.instructions_without_colours())
+    all_ud = eighteen.compute_all_up_downs(cols)
+    assert eighteen.compute_area(all_ud) == 47139
+
+def test_find_area2():
+    with open(os.path.join("tests", "test_18.txt")) as f:
+        dp = eighteen.DigPlan2(f)
+    assert eighteen.area_from_digplan2(dp) == 952408144115

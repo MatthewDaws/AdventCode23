@@ -36,3 +36,31 @@ def test_chinese_remainder():
     assert util.chinese_remainder(td) == (util.brute_force_chinese_remainder(td), 7*10*17)
     with pytest.raises(ValueError):
         assert util.chinese_remainder([(5, 8), (102, 7), (162, 6)])
+
+def test_Interval():
+    i = util.Interval(10, 15)
+    assert i.contains(10)
+    assert i.contains(15)
+    assert i.contains(12)
+    assert not i.contains(8)
+    assert repr(i) == "Interval(10,15)"
+
+    with pytest.raises(ValueError):
+        util.Interval(10, 8)
+
+    i = util.Interval.from_start_length(10, -3)
+    assert repr(i) == "Interval(7,10)"
+
+    j = util.Interval(5, 12)
+    assert j < i
+    assert j <= i
+    assert i > j
+    assert i >= j
+    assert not i==j
+    assert hash(i) != hash(j)
+    assert i==i
+    assert i<=i
+    assert i>=i
+
+    assert i.intersect(j) == util.Interval(7,10)
+

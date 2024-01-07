@@ -101,3 +101,50 @@ def winding_number(path, row, col):
             last_quad = new_quad
     crosses = update_crosses(last_quad, start_quad, crosses)
     return crosses
+
+
+class Interval:
+    """Represents an interval including the end-points"""
+    def __init__(self, a, b):
+        if not a<=b:
+            raise ValueError()
+        self._range=(a,b)
+
+    @staticmethod
+    def from_start_length(start, length):
+        if length < 0:
+            return Interval(start+length, start)
+        return Interval(start, start+length)
+
+    @property
+    def start(self):
+        return self._range[0]
+
+    @property
+    def end(self):
+        return self._range[1]
+
+    def contains(self, x):
+        return self.start <= x and  x <= self.end
+
+    def __repr__(self):
+        return f"Interval({self.start},{self.end})"
+    
+    def __eq__(self, other):
+        return self._range == other._range
+    
+    def __hash__(self):
+        return hash(self._range)
+    
+    def __lt__(self, other):
+        return self.start < other.start
+    
+    def __le__(self, other):
+        return self.start <= other.start
+
+    def intersect(self, other):
+        a = max(self.start, other.start)
+        b = min(self.end, other.end)
+        if a<=b:
+            return Interval(a,b)
+        return None

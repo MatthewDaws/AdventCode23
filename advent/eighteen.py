@@ -1,4 +1,5 @@
-from .util import winding_number
+from .util import winding_number, Interval
+import enum, itertools
 
 class DigPlan:
     def __init__(self, rows):
@@ -19,6 +20,9 @@ class DigPlan:
     def instructions(self):
         return self._instructions
     
+    def instructions_without_colours(self):
+        return [(d,l) for d,l,_ in self._instructions]
+
     def dig(self):
         rowrange, colrange = self._find_size()
         self._offsetrow = -rowrange[0]
@@ -87,6 +91,11 @@ class DigPlan:
     @staticmethod
     def count_dug(grid):
         return sum(sum(x for x in row) for row in grid)
+       
+
+class EndDir(enum.Enum):
+    UP = 0
+    DOWN = 1
 
 
 class DigPlan2:
@@ -115,10 +124,113 @@ class DigPlan2:
         return self._instructions
 
 
+def construct_row_plan(instructions):
+    row_plans = dict()
+    row, col = 0, 0
+    for (d, l) in instructions:
+        if row not in row_plans:
+            row_plans[row] = list()
+        if d == "U":
+            row -= l
+        if d == "D":
+            row += l
+        if d == "R":
+            row_plans[row].append( Interval.from_start_length(col, l) )
+            col += l
+        if d == "L":
+            row_plans[row].append( Interval.from_start_length(col, -l) )
+            col -= l
+    for key in row_plans:
+        row_plans[key].sort()
+    assert (row,col) == (0,0)
+    up_downs = dict()
+    for (d, l) in instructions:
+        if row not in up_downs:
+            up_downs[row] = list()
+        if d == "U":
+            up_downs[row].append((col, "U"))
+            row -= l
+            if row not in up_downs:
+                up_downs[row] = list()
+            up_downs[row].append((col, "D"))
+        if d == "D":
+            up_downs[row].append((col, "D"))
+            row += l
+            if row not in up_downs:
+                up_downs[row] = list()
+            up_downs[row].append((col, "U"))
+        if d == "R":
+            col += l
+        if d == "L":
+            col -= l
+    for key in up_downs:
+        up_downs[key].sort(key=lambda pair:pair[0])
+    return row_plans, up_downs
+
+
+def compute_all_up_downs(up_downs):
+    all_downs = dict()
+    rows = list(up_downs)
+    rows.sort()
+    current_downs = []
+    for row in rows:
+        downs = set(col for col, direction in up_downs[row] if direction=="D")
+        downs.update(current_downs)
+        for col, direction in up_downs[row]:
+            if direction=="U":
+                downs.remove(col)
+        all_downs[row] = list(downs)
+        all_downs[row].sort()
+        current_downs = downs
+    return all_downs
+
+def double_counts(new_intervals, previous_intervals):
+    area = 0
+    for (i,j) in itertools.product(new_intervals, previous_intervals):
+        k = i.intersect(j)
+        if k is not None:
+            area += k.end - k.start + 1
+    return area
+
+def find_intervals(downs):
+    new_intervals = []
+    index = 0
+    width = 0
+    while index < len(downs):
+        width += downs[index+1] - downs[index] + 1
+        new_intervals.append( Interval(downs[index], downs[index+1]) )
+        index += 2
+    return width, new_intervals
+
+def compute_area(up_downs):
+    rows = list(up_downs)
+    rows.sort()
+    area = 0
+    previous_intervals = []
+    row_index = 0
+    while row_index < len(rows)-1:
+        row = rows[row_index]
+        height = rows[row_index+1] - row + 1
+        width, new_intervals = find_intervals(up_downs[row])
+        area += width * height
+        area -= double_counts(new_intervals, previous_intervals)
+        previous_intervals = new_intervals
+        row_index += 1
+    return area
+
+def area_from_digplan2(dp2):
+    _, cols = construct_row_plan(dp2.instructions)
+    all_ud = compute_all_up_downs(cols)
+    return compute_area(all_ud)
 
 def main(second_flag):
+    if not second_flag:
+        with open("input_18.txt") as f:
+            dp = DigPlan(f)
+        grid = dp.dig()
+        dp.fill_in_dig(grid)
+        return dp.count_dug(grid)
+
     with open("input_18.txt") as f:
-        dp = DigPlan(f)
-    grid = dp.dig()
-    dp.fill_in_dig(grid)
-    return dp.count_dug(grid)
+        dp = DigPlan2(f)
+    return area_from_digplan2(dp)
