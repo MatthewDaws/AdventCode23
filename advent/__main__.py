@@ -90,3 +90,11 @@ if puzzle==18:
 if puzzle==19:
     from . import nineteen
     print(nineteen.main(second_flag))
+
+if puzzle==20:
+    from . import twenty
+    print(twenty.main(second_flag))
+
+if puzzle==21:
+    from . import twentyone
+    print(twentyone.main(second_flag))
