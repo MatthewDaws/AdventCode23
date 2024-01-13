@@ -1,6 +1,7 @@
 # Puzzle input files
 input*.txt
 debug.txt
+temp.txt
 
 .vscode
 

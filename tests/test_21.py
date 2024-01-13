@@ -19,6 +19,15 @@ def eg():
     with open(os.path.join("tests", "test_21.txt")) as f:
         return twentyone.Garden(f)
 
+def test_expand(eg):
+    g = eg.expand(3)
+    assert g.rows == 33
+    assert g.cols == 33
+    assert g.at(16, 16) == "S"
+
+def test_possible_walk(eg):
+    assert eg.maximum_expected_walk(1) == {(5,4), (4,5)}
+    assert eg.maximum_expected_walk(2) == {(5,3), (5,5), (3,5), (6,4), (6,6), (7,5)}
 
 def test_move(eg):
     assert eg.walk() == { (4,5), (5,4) }
