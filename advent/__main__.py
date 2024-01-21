@@ -102,3 +102,7 @@ if puzzle==21:
 if puzzle==22:
     from . import twentytwo
     print(twentytwo.main(second_flag))
+
+if puzzle==23:
+    from . import twentythree
+    print(twentythree.main(second_flag))
