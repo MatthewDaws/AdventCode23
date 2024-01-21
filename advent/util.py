@@ -205,6 +205,15 @@ class WeightedGraph(Graph):
     def weighted_neighbours_of(self, vertex):
         return zip(self._neighbourhoods[vertex], self._weights[vertex])
 
+    def __str__(self):
+        out = []
+        for v in self.vertices:
+            line = f"{v}: "
+            for u,l in self.weighted_neighbours_of(v):
+                line = line + f" ({u},{l})"
+            out.append(line)
+        return "\n".join(out)
+
 
 def topological_sort(graph):
     to_visit = set(graph.vertices)

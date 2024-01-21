@@ -38,4 +38,21 @@ def test_top_sort(eg):
 
 def test_longest_path(eg):
     assert eg.longest_path() == 94
-    
+
+def test_2nd_parse_build_graph():
+    with open(os.path.join("tests", "test_23.txt")) as f:
+        forest = twentythree.Forest2(f)
+
+@pytest.fixture
+def eg2():
+    with open(os.path.join("tests", "test_23.txt")) as f:
+        return twentythree.Forest2(f)
+
+def test_2nd_graph(eg2):
+    g = eg2.build_undirected_graph()
+    assert len(list(g.neighbours_of(0))) == 1
+    _l, length = list(g.weighted_neighbours_of(0))[0]
+    assert length == 15
+
+def test_2nd_longest_path(eg2):
+    assert eg2.longest_path() == 154
