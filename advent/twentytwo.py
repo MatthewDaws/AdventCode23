@@ -27,12 +27,16 @@ class Bricks:
         assert zmin >= 1
         assert xmin >= 0
         assert ymin >= 0
-        self._zrows = [ [[-1 for _ in range(ymax+1)] for _ in range(xmax+1)] for _ in range(zmax+1)]
+        self._zrows = [[-1 for _ in range((ymax+1)*(xmax+1))] for _ in range(zmax+1)]
+        self._xys = []
         for index, (start, end) in enumerate(self._bricks):
+            self._xys.append([])
+            for x in range(start[0], end[0]+1):
+                for y in range(start[1], end[1]+1):
+                    self._xys[-1].append(x+y*(xmax+1))
             for z in range(start[2], end[2]+1):
-                for x in range(start[0], end[0]+1):
-                    for y in range(start[1], end[1]+1):
-                        self._zrows[z][x][y] = index
+                for i in self._xys[-1]:
+                    self._zrows[z][i] = index
 
     @property
     def xrange(self):
@@ -50,26 +54,20 @@ class Bricks:
         return len(self._bricks)
 
     def occupied(self, x,y,z):
-        return self._zrows[z][x][y] != -1
-
-    def _xys(self, index):
-        start, end = self._bricks[index]
-        for x in range(start[0], end[0]+1):
-            for y in range(start[1], end[1]+1):
-                yield x,y
+        return self._zrows[z][x+y*(self.xrange+1)] != -1
 
     def can_drop(self, index):
-        start, end = self._bricks[index]
+        start, _ = self._bricks[index]
         z = start[2] - 1
         if z==0:
             return False
-        return not any(self.occupied(x,y,z) for (x,y) in self._xys(index))
+        return all(self._zrows[z][i]==-1 for i in self._xys[index])
     
     def drop(self, index):
         start, end = self._bricks[index]
-        for (x,y) in self._xys(index):
-            self._zrows[start[2]-1][x][y] = index
-            self._zrows[end[2]][x][y] = -1
+        for i in self._xys[index]:
+            self._zrows[start[2]-1][i] = index
+            self._zrows[end[2]][i] = -1
         start = [start[0], start[1], start[2]-1]
         end = [end[0], end[1], end[2]-1]
         self._bricks[index] = (start, end)
@@ -89,9 +87,9 @@ class Bricks:
                 return bricks_dropped
             
     def supporting(self, index):
-        start, end = self._bricks[index]
+        start, _ = self._bricks[index]
         below_row = self._zrows[start[2]-1]
-        below = set(below_row[x][y] for x in range(start[0], end[0]+1) for y in range(start[1], end[1]+1))
+        below = set(below_row[i] for i in self._xys[index])
         below.discard(-1)
         return below
 
@@ -108,19 +106,17 @@ class Bricks:
     def spawn_with_removal(self, index_to_remove):
         spawn = Bricks([])
         spawn._bricks = list(self._bricks)
+        spawn._xys = self._xys
         spawn.set_skipped_index(index_to_remove)
         spawn._zrows = []
         for zrow in self._zrows:
-            new_xrow = []
-            for xrow in zrow:
-                new_yrow = []
-                for entry in xrow:
-                    if entry == index_to_remove:
-                        new_yrow.append(-1)
-                    else:
-                        new_yrow.append(entry)
-                new_xrow.append(new_yrow)
-            spawn._zrows.append(new_xrow)
+            new_row = []
+            for entry in zrow:
+                if entry == index_to_remove:
+                    new_row.append(-1)
+                else:
+                    new_row.append(entry)
+            spawn._zrows.append(new_row)
         return spawn
     
     def count_all_drops(self):
