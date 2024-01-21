@@ -148,3 +148,97 @@ class Interval:
         if a<=b:
             return Interval(a,b)
         return None
+
+
+class BaseGraph:
+    """Just defines an interface for various algorithms"""
+    def __init__(self):
+        pass
+
+    @property
+    def vertices(self):
+        pass
+
+    def neighbours_of(self, vertex):
+        pass
+
+    def weighted_neighbours_of(self, vertex):
+        """Return a list of pairs (neighbour, length_of_edge)"""
+        raise NotImplementedError()
+
+
+class Graph(BaseGraph):
+    def __init__(self):
+        self._vertices = []
+        self._neighbourhoods = dict()
+
+    def add_vertex(self, v):
+        if v in self._neighbourhoods:
+            raise ValueError(f"Already has vertex '{v}'")
+        self._vertices.append(v)
+        self._neighbourhoods[v] = []
+
+    def add_directed_edge(self, start, end):
+        self._neighbourhoods[start].append(end)
+
+    @property
+    def vertices(self):
+        return self._vertices
+    
+    def neighbours_of(self, vertex):
+        return self._neighbourhoods[vertex]
+    
+
+class WeightedGraph(Graph):
+    def __init__(self):
+        super().__init__()
+        self._weights = dict()
+
+    def add_vertex(self, v):
+        super().add_vertex(v)
+        self._weights[v] = []
+
+    def add_directed_edge(self, start, end, weight):
+        super().add_directed_edge(start, end)
+        self._weights[start].append(weight)
+
+    def weighted_neighbours_of(self, vertex):
+        return zip(self._neighbourhoods[vertex], self._weights[vertex])
+
+
+def topological_sort(graph):
+    to_visit = set(graph.vertices)
+    seen = dict()
+    reverse_dag = []
+    def visit(vertex):
+        if vertex in seen:
+            if seen[vertex] == 1:
+                return
+            raise ValueError("Not a DAG")
+        seen[vertex] = 0
+        to_visit.discard(vertex)
+        for neigh in graph.neighbours_of(vertex):
+            visit(neigh)
+        seen[vertex] = 1
+        reverse_dag.append(vertex)
+    while len(to_visit) > 0:
+        visit(to_visit.pop())
+    reverse_dag.reverse()
+    return reverse_dag
+
+def shortest_path_dag(graph, initial_vertex, sorted_vertices=None):
+    if sorted_vertices is None:
+        sorted_vertices = topological_sort(graph)
+    distances = [None for _ in range(len(sorted_vertices))]
+    predecessors = [None for _ in range(len(sorted_vertices))]
+    distances[initial_vertex] = 0
+    index = sorted_vertices.index(initial_vertex)
+    while index < len(sorted_vertices):
+        vertex = sorted_vertices[index]
+        for u, d in graph.weighted_neighbours_of(vertex):
+            newlen = distances[vertex] + d
+            if distances[u] is None or distances[u] > newlen:
+                distances[u] = newlen
+                predecessors[u] = vertex
+        index += 1
+    return distances, predecessors

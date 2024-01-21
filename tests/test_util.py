@@ -64,3 +64,54 @@ def test_Interval():
 
     assert i.intersect(j) == util.Interval(7,10)
 
+
+@pytest.fixture
+def graph1():
+    g = util.Graph()
+    for i in range(4):
+        g.add_vertex(i)
+    g.add_directed_edge(0,1)
+    g.add_directed_edge(0,2)
+    g.add_directed_edge(1,3)
+    g.add_directed_edge(2,3)
+    return g
+
+def test_Graph(graph1):
+    assert graph1.vertices == [0,1,2,3]
+    assert graph1.neighbours_of(0) == [1,2]
+    assert graph1.neighbours_of(1) == [3]
+    assert graph1.neighbours_of(2) == [3]
+    assert graph1.neighbours_of(3) == []
+
+    with pytest.raises(ValueError):
+        graph1.add_vertex(2)
+    with pytest.raises(KeyError):
+        graph1.neighbours_of(5)
+
+def test_TopSort(graph1):
+    ts = util.topological_sort(graph1)
+    assert (ts == [0,1,2,3] or ts == [0,2,1,3])
+
+    graph1.add_directed_edge(3,0)
+    with pytest.raises(ValueError):
+        util.topological_sort(graph1)
+
+def test_Weighted_Graph():
+    g = util.WeightedGraph()
+    for i in range(4):
+        g.add_vertex(i)
+    g.add_directed_edge(0,1,5)
+    g.add_directed_edge(0,2,3)
+
+    assert g.neighbours_of(0) == [1, 2]
+    assert list(g.weighted_neighbours_of(0)) == [(1,5), (2,3)]
+
+def test_shortest_path_dag():
+    g = util.WeightedGraph()
+    for i in range(6):
+        g.add_vertex(i)
+    for s,e,l in [(0,1,5), (0,2,7), (1,3,10), (1,4,2), (2,3,4), (3,5,2), (4,5,4)]:
+        g.add_directed_edge(s,e,l)
+    dists, preds = util.shortest_path_dag(g, 0)
+    assert dists == [0,5,7,11,7,11]
+    assert preds == [None,0,0,2,1,4]
