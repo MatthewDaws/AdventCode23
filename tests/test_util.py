@@ -115,3 +115,42 @@ def test_shortest_path_dag():
     dists, preds = util.shortest_path_dag(g, 0)
     assert dists == [0,5,7,11,7,11]
     assert preds == [None,0,0,2,1,4]
+
+def test_integer_sqroot():
+    with pytest.raises(ValueError):
+        util.integer_sqrt(-1)
+    for n in range(1000):
+        x = util.integer_sqrt(n)
+        assert x*x <= n < (x+1)*(x+1)
+
+def test_integer_quad():
+    assert util.integer_quadratic(1,2,1) == [-1]
+    assert util.integer_quadratic(5,5,-30) == [-3,2]
+    assert util.integer_quadratic(1,2,3) == []
+    assert util.integer_quadratic(6,1,-2) == []
+    assert util.integer_quadratic(0, 12288, -577536) == [47]
+    assert util.integer_quadratic(-3,3,60) == [-4, 5]
+    assert util.integer_quadratic(5, -62, 185) == [5]
+
+def test_Vector():
+    v = util.Vector(1,2,3)
+    u = util.Vector(5,8,10)
+    assert v.x == 1
+    assert u.y == 8
+    assert v.z == 3
+    assert u*v == 51 and v*u == 51
+    assert u+v == util.Vector(6,10,13)
+    assert u-v == util.Vector(4,6,7)
+    assert -u == util.Vector(-5,-8,-10)
+    assert 3 * v == util.Vector(3,6,9)
+    assert v @ u == util.Vector(-4, 5, -2)
+
+    assert not u.is_null()
+    w = util.Vector(0,0,0)
+    assert w.is_null()
+
+def test_inverse_mod_n():
+    x = util.inverse_modn(5, 7)
+    assert (5*x) % 7 == 1
+    with pytest.raises(ValueError):
+        util.inverse_modn(5, 10)

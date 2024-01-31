@@ -251,3 +251,132 @@ def shortest_path_dag(graph, initial_vertex, sorted_vertices=None):
                 predecessors[u] = vertex
         index += 1
     return distances, predecessors
+
+
+def integer_sqrt(x):
+    """Find the integer sqaure-root of x, rounding down"""
+    if x<0:
+        raise ValueError()
+    if x==0:
+        return 0
+    low = 1
+    high = x
+    while high-low > 1:
+        # Keep invariant low*low <= x <= high*high
+        mid = (low+high)//2
+        if mid*mid > x:
+            high = mid
+        else:
+            low = mid
+    if high*high == x:
+        return high
+    return low
+
+def integer_quadratic(a,b,c):
+    """Find integer solutions to a*x*x+b*x+c==0"""
+    if a == 0:
+        if b==0:
+            raise ValueError()
+        if c%b != 0:
+            return []
+        return [-c//b]
+    dis = b*b - 4*a*c
+    if dis < 0:
+        return []
+    dissqr = integer_sqrt(dis)
+    if dissqr * dissqr != dis:
+        return []
+    out = set()
+    def allowed(sign):
+        top = -b + sign * dissqr
+        bot = 2 * a
+        if top % bot == 0:
+            out.add(top//bot)
+    allowed(+1)
+    allowed(-1)
+    out = list(out)
+    out.sort()
+    return out
+
+
+class Vector:
+    """A simple 3D vector class"""
+    def __init__(self,x,y,z):
+        self._coords = [x,y,z]
+
+    @property
+    def x(self):
+        return self._coords[0]
+
+    @property
+    def y(self):
+        return self._coords[1]
+
+    @property
+    def z(self):
+        return self._coords[2]
+    
+    def __repr__(self):
+        return f"Vector({self.x}, {self.y}, {self.z})"
+
+    def __getitem__(self, i):
+        return self._coords[i]
+
+    def __eq__(self, other):
+        return self._coords == other._coords
+
+    def __add__(self, other):
+        return Vector(self.x+other.x, self.y+other.y, self.z+other.z)
+    
+    def __sub__(self, other):
+        return Vector(self.x-other.x, self.y-other.y, self.z-other.z)
+
+    def __neg__(self):
+        return Vector(-self.x, -self.y, -self.z)
+
+    def __mul__(self, other):
+        return self.x*other.x + self.y*other.y + self.z*other.z
+
+    def __matmul__(self, other):
+        return Vector(self.y*other.z - self.z*other.y, self.z*other.x - self.x*other.z, self.x*other.y - self.y*other.x)
+
+    def __rmul__(self, scalar):
+        return Vector(scalar*self.x, scalar*self.y, scalar*self.z)
+
+    def is_null(self):
+        return all(x==0 for x in self._coords)
+
+
+def extgcd(a, b):
+    """Extended Euclidean algorithm.
+    
+    (a, b) : Integers to find gcd of
+
+    Returns: (d, s, t)
+      d : The gcd of (a,b)
+      (s,t) : Integers such that s*a + t*b == d
+
+    Raises: ValueError if a==b==0
+    """
+    a, b = int(a), int(b)
+    if a==0 and b==0:
+        raise ValueError("gcd(0,0) is undefined")
+    nega, negb = 1, 1
+    if a < 0:
+        nega, a = -1, -a
+    if b < 0:
+        negb, b = -1, -b
+    s, ss, t, tt  = 1, 0, 0, 1
+    while b > 0:
+        q = a // b
+        a, b = b, a % b
+        s, ss = ss, s - q*ss
+        t, tt = tt, t - q*tt
+    return a, s*nega, t*negb
+
+def inverse_modn(x, n):
+    """Compute the inverse of `x` modulo `n` or Raises ValueError."""
+    d, s, t = extgcd(x, n)
+    if d != 1:
+        raise ValueError(f"{x} is not invertible modulo {n}")
+    return s % n
