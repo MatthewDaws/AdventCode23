@@ -154,3 +154,55 @@ def test_inverse_mod_n():
     assert (5*x) % 7 == 1
     with pytest.raises(ValueError):
         util.inverse_modn(5, 10)
+
+def test_DisjointUnion():
+    d = util.DisjointSet("abcd")
+    assert d.entries == {"a", "b", "c", "d"}
+
+    d = util.DisjointSet()
+    d.add(1)
+    d.add(5)
+    d.add(7)
+    d.add(7)
+    assert d.entries == {5,7,1}
+    assert d.as_sets() == { frozenset({x}) for x in [1,5,7] }
+    assert d.contains(5)
+    assert not d.contains(2)
+
+    assert d.find(1) != d.find(7)
+    assert d.find(1) == d.find(1)
+    with pytest.raises(KeyError):
+        d.find(2)
+
+    d.union(1,7)
+    assert d.find(1) == d.find(7)
+    assert d.find(1) != d.find(5)
+    with pytest.raises(KeyError):
+        d.union(1,2)
+    assert d.as_sets() == { frozenset({1,7}), frozenset({5}) }
+    d.union(5,7)
+    assert d.find(1) == d.find(7)
+    assert d.find(1) == d.find(5)
+    d.union(1,7)
+    assert d.as_sets() == { frozenset({1,5,7}) }
+    assert d.find_depth() == 1
+
+    d = util.DisjointSet(range(100))
+    for x in range(1,100):
+        d.union(0, x)
+    ss = list(d.as_sets())
+    assert len(ss) == 1
+    assert len(ss[0]) == 100
+    assert d.find_depth() == 1
+
+def test_Kruskal():
+    A="A"
+    B="B"
+    C="C"
+    D="D"
+    E="E"
+    F="F"
+    G="G"
+    edges = [(A,D), (C,E), (D,F), (A,B), (B,E), (B,C), (E,F), (D,B), (G,E), (G,F), (E,D)]
+    tree = util.Kruskal(edges)
+    assert tree == [(A,D), (C,E), (D,F), (A,B), (B,E), (G,E)]
