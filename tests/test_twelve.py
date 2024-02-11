@@ -11,6 +11,64 @@ def test_parse():
 def example1():
     return twelve.SpringLine("???.### 1,1,3")
 
+def test_canplace(example1):
+    assert example1.can_place(2, 4)
+    for x in range(5, 20):
+        assert not example1.can_place(2, x)
+    assert not example1.can_place(2, 3)
+    assert not example1.can_place(2, 2)
+    assert not example1.can_place(2, 1)
+    assert example1.can_place(2, 0)
+
+def test_canplace_last(example1):
+    assert example1.can_place_last(4)
+    assert not example1.can_place_last(0)
+
+def test_dp(example1):
+    assert twelve.build_dynamic_programme(example1) == 1
+
+@pytest.fixture
+def example2():
+    return twelve.SpringLine(".??..??...?##. 1,1,3")
+
+def test_dp2(example2):
+    assert twelve.build_dynamic_programme(example2) == 4
+
+@pytest.fixture
+def example3():
+    return twelve.SpringLine("?###???????? 3,2,1")
+
+def test_dp3(example3):
+    assert not example3.can_place(0, 0)
+    assert example3.can_place(0, 1)
+    assert not example3.can_place(0, 2)
+    assert twelve.build_dynamic_programme(example3) == 10
+
+# I think we miss some global checks...
+# Can solve by checking no "#" appears in a "gap"
+def test_corner_case():
+    sl = twelve.SpringLine("?#???#???#? 2,1")
+    for x in range(11):
+        if sl.can_place_last(x):
+            assert x==9
+
+    assert twelve.build_dynamic_programme(sl) == 0
+
+def test_example_with_dp():
+    with open(os.path.join("tests", "test_12.txt")) as f:
+        for row, expected in zip(f, [1,4,1,1,4,10]):
+            sl = twelve.SpringLine(row)
+            assert twelve.build_dynamic_programme(sl) == expected
+
+def test_example_with_dp_unfolded():
+    with open(os.path.join("tests", "test_12.txt")) as f:
+        for row, expected in zip(f, [1,16384,1,16,2500,506250]):
+            sl = twelve.SpringLine(row, True)
+            assert twelve.build_dynamic_programme(sl) == expected
+
+
+
+
 def test_PartialSolution_greedyfind(example1):
     ps = twelve.PartialSolution(example1, "???.###")
     assert ps.greedy_find() == "#.#.###"
@@ -30,9 +88,6 @@ def test_PartialSolution_isvalid(example1):
     ps = twelve.PartialSolution(example1, "##..###")
     assert not ps.is_valid
 
-@pytest.fixture
-def example2():
-    return twelve.SpringLine(".??..??...?##. 1,1,3")
 
 def test_PartialSolution_greedyfind2(example2):
     ps = twelve.PartialSolution(example2, ".??..??...?##")
@@ -110,21 +165,27 @@ def test_example_new():
     with open(os.path.join("tests", "test_12.txt")) as f:
         assert twelve.count_all_solutions_new(f) == 21
 
-def atest_slow():
-    sl = twelve.SpringLine("??.???.#?????.???.#?????.???.#?????.???.#?????.???.#?? 1,1,2,1,1,2,1,1,2,1,1,2,1,1,2")
+# ---------------------------------------------------------------
 
-    assert twelve.count_solutions_new(sl) == 645189
+# twelve.SpringLine("??#????.????#??? 4,2,5,1")
+# twelve.SpringLine("?.###?#?#??.? 1,7")
 
+def test_split():
+    sl = twelve.FastSpringLine("??#...###.??#?. 2,3,2")
+    assert sl.split() == ["??#", "###", "??#?"]
 
-def atest_analysis():
-    with open("input_12.txt") as f:
-        diffs = []
-        for row in f:
-            sl = twelve.SpringLine(row, True)
-            minlength = sum(sl.codes) + len(sl.codes) - 1
-            length = len(sl.row)
-            diffs.append(length-minlength)
-            if diffs[-1]>10:
-                print(sl.row, sl.codes)
-    #print(diffs)
-    raise Exception()
+def test_SharpBlock():
+    sb = twelve.SharpBlock("???######??#?")
+    assert list(sb) == [("?",3), ("#",6), ("?",2), ("#",1), ("?",1)]
+
+    with pytest.raises(AssertionError):
+        twelve.SharpBlock("???.##")
+
+def test_SharpBlock_assignments():
+    sb = twelve.SharpBlock("???######??#?")
+    assert list(sb.assignments([1,7,1])) == [[1,2]]
+    assert list(sb.assignments([1,6,3])) == [[1,2]]
+    assert list(sb.assignments([5,3])) == []
+    assert list(sb.assignments([1,6])) == []
+    assert list(sb.assignments([9])) == [[0,0]]
+    assert list(sb.assignments([9,2])) == [[0,0], [0,1]]
