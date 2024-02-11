@@ -4,16 +4,26 @@ args = sys.argv[1:]
 try:
     if len(args) not in (1,2):
         raise SyntaxError()
-    puzzle = int(args[0])
-    if len(args) == 2:
-        if args[1] != "2nd":
-            raise SyntaxError()
-        second_flag = True
+    if args[0] == "test":
+        mode = "test"
     else:
-        second_flag = False
+        mode = "normal"
+        puzzle = int(args[0])
+        if len(args) == 2:
+            if args[1] != "2nd":
+                raise SyntaxError()
+            second_flag = True
+        else:
+            second_flag = False
 except:
     print("Usage: python {} {{puzzle number}} [2nd]".format(sys.argv[0]))
+    print("Or use command 'test' to run all puzzles and check against expected answers.")
     exit(-1)
+
+if mode == "test":
+    from . import test
+    test.all()
+    exit(0)
 
 if puzzle==1:
     from . import one
